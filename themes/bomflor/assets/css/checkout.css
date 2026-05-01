@@ -1,0 +1,1080 @@
+/* ═══════════════════════════════════════════════════════════════
+   CHECKOUT — Bomflor Theme
+   Targets bomflor/woocommerce/checkout/form-checkout.php structure:
+     form.woocommerce-checkout (direct children)
+       ├── div#customer_details   (billing card)
+       ├── div.bomflor-delivery-fields  (delivery card)
+       ├── h3#order_review_heading      (sidebar header)
+       └── div#order_review             (sidebar body)
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page background & wrapper resets ─────────────────────────── */
+body.woocommerce-checkout {
+  background: #edece8 !important;
+}
+body.woocommerce-checkout .wp-block-group,
+body.woocommerce-checkout .wp-block-post-content {
+  padding: 0 !important;
+  max-width: none !important;
+}
+body.woocommerce-checkout .is-layout-constrained > * {
+  max-width: none !important;
+}
+body.woocommerce-checkout .woocommerce {
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ─── Coupon toggle (lives outside the form) ────────────────────── */
+.woocommerce-form-coupon-toggle {
+  max-width: 1050px;
+  margin-inline: auto;
+  padding: 1.5rem 1.25rem 0;
+}
+@media (min-width: 768px) {
+  .woocommerce-form-coupon-toggle {
+    padding: 2rem 3.5rem 0;
+  }
+}
+.woocommerce-form-coupon-toggle .woocommerce-info {
+  background: #fff !important;
+  border: 1px solid #dedad2 !important;
+  border-top: 2px solid var(--wp--preset--color--lime) !important;
+  border-radius: 0 0 8px 8px !important;
+  padding: .75rem 1.25rem !important;
+  font-size: .78rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  margin: 0 !important;
+}
+.woocommerce-form-coupon-toggle .woocommerce-info::before { display: none !important; }
+.woocommerce-form-coupon-toggle .woocommerce-info a {
+  color: var(--wp--preset--color--lime-deep) !important;
+  text-decoration: underline !important;
+}
+
+/* Coupon input form */
+.checkout_coupon.woocommerce-form-coupon {
+  max-width: 1050px;
+  margin-inline: auto;
+  padding: .5rem 1.25rem 0;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  display: flex;
+  gap: .75rem;
+  align-items: flex-end;
+}
+@media (min-width: 768px) {
+  .checkout_coupon.woocommerce-form-coupon { padding: .5rem 3.5rem 0; }
+}
+.checkout_coupon .form-row { flex: 1; margin: 0 !important; }
+.checkout_coupon .button {
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: var(--wp--preset--color--ink) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: .75rem 1.25rem !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .72rem !important;
+  letter-spacing: .08em !important;
+  cursor: pointer !important;
+}
+
+/* ─── Checkout notices ──────────────────────────────────────────── */
+
+/* The notice group lives inside the grid form as the first child.
+   grid-column: 1 / -1 ensures it spans both columns and never
+   displaces .bf-checkout-left or .bf-checkout-right. */
+form.woocommerce-checkout > .woocommerce-NoticeGroup-checkout {
+  grid-column: 1 / -1 !important;
+  /* Collapse completely when empty — no height, no gap */
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+form.woocommerce-checkout > .woocommerce-NoticeGroup-checkout:empty {
+  display: none !important;
+}
+
+/* Error list inside the notice group */
+form.woocommerce-checkout > .woocommerce-NoticeGroup-checkout .woocommerce-error {
+  background: #fff4f4 !important;
+  border: 1px solid rgba(180,50,50,.2) !important;
+  border-radius: 8px !important;
+  padding: .8rem 1.1rem !important;
+  margin: 0 0 .5rem !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .78rem !important;
+  color: #9b2c2c !important;
+  list-style: none !important;
+}
+form.woocommerce-checkout > .woocommerce-NoticeGroup-checkout .woocommerce-error li {
+  padding: .2rem 0 !important;
+  list-style: none !important;
+}
+form.woocommerce-checkout > .woocommerce-NoticeGroup-checkout .woocommerce-error::before {
+  display: none !important;
+}
+
+/* Outside-form notices (coupon toggle area) */
+.woocommerce-checkout .woocommerce-message {
+  border-top-color: var(--wp--preset--color--lime) !important;
+}
+
+/* ─── Inline field validation ───────────────────────────────────── */
+/* Red border on invalid inputs — no extra height added */
+.woocommerce-checkout .woocommerce-invalid input,
+.woocommerce-checkout .woocommerce-invalid select,
+.woocommerce-checkout .woocommerce-invalid textarea {
+  border-color: rgba(180,50,50,.6) !important;
+  box-shadow: 0 0 0 3px rgba(180,50,50,.08) !important;
+}
+/* Green border on validated inputs */
+.woocommerce-checkout .woocommerce-validated input,
+.woocommerce-checkout .woocommerce-validated select {
+  border-color: var(--wp--preset--color--lime) !important;
+  box-shadow: none !important;
+}
+/* Inline error label — stays tight under the field */
+.woocommerce-checkout .woocommerce-invalid .woocommerce-error,
+.woocommerce-checkout .woocommerce-invalid > em {
+  display: block !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .68rem !important;
+  color: #c44 !important;
+  margin-top: .25rem !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  list-style: none !important;
+}
+
+/* ─── Checkout form — 2-column grid ─────────────────────────────── */
+form.woocommerce-checkout {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 1.25rem !important;
+  max-width: 1050px !important;
+  margin-inline: auto !important;
+  padding: 1.5rem 1.25rem 3rem !important;
+  align-items: start !important;
+  box-sizing: border-box !important;
+}
+
+.bf-checkout-left {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.25rem !important;
+}
+.bf-checkout-right {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+@media (min-width: 768px) {
+  form.woocommerce-checkout {
+    grid-template-columns: 1fr 40% !important;
+    gap: 0 2rem !important;
+    padding: 2rem 3.5rem 4rem !important;
+  }
+
+  .bf-checkout-right {
+    position: sticky !important;
+    top: 2rem !important;
+    align-self: start !important;
+  }
+}
+
+/* ─── White cards ───────────────────────────────────────────────── */
+#customer_details,
+.bomflor-delivery-fields {
+  background: #fff !important;
+  border: 1px solid #dedad2 !important;
+  border-radius: 10px !important;
+  padding: 1.5rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Reset nested billing field wrapper — no extra card */
+.woocommerce-billing-fields,
+.woocommerce-account-fields {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* ─── Card headings ─────────────────────────────────────────────── */
+.woocommerce-billing-fields > h3,
+.bomflor-delivery-fields > h3 {
+  font-family: var(--wp--preset--font-family--display) !important;
+  font-size: 1.35rem !important;
+  font-weight: 300 !important;
+  color: var(--wp--preset--color--ink) !important;
+  margin: 0 0 1.25rem !important;
+  padding-bottom: .75rem !important;
+  border-bottom: 1px solid rgba(20,20,18,.07) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+.woocommerce-billing-fields > h3 svg.lucide,
+.bomflor-delivery-fields > h3 svg.lucide {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  stroke-width: 1.5;
+  color: #999 !important;
+}
+
+/* Hide duplicate section headings added by checkout field plugins inside the fields wrapper */
+.woocommerce-billing-fields__field-wrapper h2,
+.woocommerce-billing-fields__field-wrapper h3,
+.woocommerce-billing-fields__field-wrapper h4,
+.woocommerce-billing-fields__field-wrapper .form-heading {
+  display: none !important;
+}
+
+/* ─── Form rows ─────────────────────────────────────────────────── */
+.woocommerce-checkout .form-row {
+  margin-bottom: .9rem !important;
+  position: relative;
+  box-sizing: border-box;
+}
+.woocommerce-checkout .form-row-first {
+  width: calc(50% - .4rem) !important;
+  float: left !important;
+  clear: left !important;
+}
+.woocommerce-checkout .form-row-last {
+  width: calc(50% - .4rem) !important;
+  float: right !important;
+  clear: right !important;
+}
+.woocommerce-checkout .form-row-wide {
+  float: none !important;
+  clear: both !important;
+  width: 100% !important;
+}
+
+/* Force first two billing fields (Nombre and RUC) to be side-by-side */
+.woocommerce-billing-fields__field-wrapper > p.form-row:nth-of-type(1) {
+  width: calc(50% - .4rem) !important;
+  float: left !important;
+  clear: left !important;
+}
+.woocommerce-billing-fields__field-wrapper > p.form-row:nth-of-type(2) {
+  width: calc(50% - .4rem) !important;
+  float: right !important;
+  clear: right !important;
+}
+
+/* Clearfix after half-width field pairs */
+.woocommerce-billing-fields__field-wrapper::after,
+.woocommerce-checkout .bomflor-delivery-fields::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+/* ─── Labels ────────────────────────────────────────────────────── */
+.woocommerce-checkout .form-row > label,
+.woocommerce-checkout .woocommerce-form__label {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .6rem !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  color: rgba(20,20,18,.45) !important;
+  font-weight: 300 !important;
+  margin-bottom: .35rem !important;
+  display: block !important;
+}
+
+/* ─── Inputs ────────────────────────────────────────────────────── */
+.woocommerce-checkout input[type="text"],
+.woocommerce-checkout input[type="email"],
+.woocommerce-checkout input[type="tel"],
+.woocommerce-checkout input[type="date"],
+.woocommerce-checkout input[type="password"],
+.woocommerce-checkout input[type="number"],
+.woocommerce-checkout select,
+.woocommerce-checkout textarea {
+  width: 100% !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  background: var(--wp--preset--color--paper) !important;
+  border: 1px solid #dedad2 !important;
+  border-radius: 8px !important;
+  padding: .75rem 1rem !important;
+  transition: border-color .2s, box-shadow .2s !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.woocommerce-checkout input:focus,
+.woocommerce-checkout select:focus,
+.woocommerce-checkout textarea:focus {
+  border-color: var(--wp--preset--color--lime) !important;
+  box-shadow: 0 0 0 3px rgba(171,208,55,.14) !important;
+  outline: none !important;
+}
+.woocommerce-checkout textarea {
+  min-height: 90px !important;
+  resize: vertical !important;
+}
+/* Custom select arrow */
+.woocommerce-checkout select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right .9rem center !important;
+  padding-right: 2.25rem !important;
+}
+
+/* ─── Required asterisk ─────────────────────────────────────────── */
+.woocommerce-checkout .required {
+  color: #c55 !important;
+  text-decoration: none !important;
+  border: none !important;
+}
+.woocommerce-checkout abbr[title] {
+  border: none !important;
+  text-decoration: none !important;
+  cursor: default !important;
+}
+
+/* ─── Field validation states ───────────────────────────────────── */
+.woocommerce-checkout .woocommerce-invalid input,
+.woocommerce-checkout .woocommerce-invalid select,
+.woocommerce-checkout .woocommerce-invalid textarea {
+  border-color: #c55 !important;
+}
+.woocommerce-checkout .woocommerce-validated input,
+.woocommerce-checkout .woocommerce-validated select {
+  border-color: var(--wp--preset--color--lime) !important;
+}
+.woocommerce-checkout .woocommerce-invalid-required-field label::after {
+  content: ' *';
+  color: #c55;
+}
+
+/* ─── Sidebar: order review heading ────────────────────────────── */
+h3#order_review_heading {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .65rem !important;
+  font-weight: 400 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase !important;
+  color: rgba(240,237,230,.45) !important;
+  background: #242424 !important;
+  border-radius: 10px 10px 0 0 !important;
+  margin: 0 !important;
+  padding: 1.25rem 1.5rem .75rem !important;
+  text-align: center !important;
+}
+
+
+/* ─── Sidebar: order review body ────────────────────────────────── */
+#order_review {
+  background: #242424 !important;
+  border-radius: 0 0 10px 10px !important;
+  padding: 0 1.5rem 1.5rem !important;
+  color: #f0ede6 !important;
+}
+
+/* Order table */
+#order_review .shop_table {
+  color: #f0ede6 !important;
+  border-collapse: collapse !important;
+  width: 100% !important;
+  font-size: .82rem !important;
+}
+/* Hide PRODUCTO / SUBTOTAL column headers — redundant in the sidebar */
+#order_review .shop_table thead {
+  display: none !important;
+}
+#order_review .shop_table tbody td {
+  padding: .75rem 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  color: #f0ede6 !important;
+  vertical-align: middle !important;
+}
+#order_review .shop_table .product-name {
+  color: #f0ede6 !important;
+  font-family: var(--wp--preset--font-family--display) !important;
+  font-weight: 300 !important;
+}
+#order_review .shop_table .product-total {
+  text-align: right !important;
+  color: #d8ea9c !important;
+  white-space: nowrap !important;
+  font-size: 1.3rem !important;
+  font-weight: 500 !important;
+  letter-spacing: .02em !important;
+}
+/* Footer rows — labels stay small, amounts get bigger */
+#order_review .shop_table tfoot tr th {
+  padding: .55rem 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  font-size: .78rem !important;
+  font-weight: 300 !important;
+  color: rgba(240,237,230,.6) !important;
+  text-align: left !important;
+}
+#order_review .shop_table tfoot tr td {
+  padding: .55rem 0 !important;
+  border-bottom: 1px solid rgba(255,255,255,.05) !important;
+  font-size: 1.015rem !important;
+  font-weight: 400 !important;
+  color: #d8ea9c !important;
+  text-align: right !important;
+}
+/* Order total row */
+#order_review .shop_table tfoot .order-total th,
+#order_review .shop_table tfoot .order-total td {
+  color: #f0ede6 !important;
+  font-size: .8rem !important;
+  font-weight: 400 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  border-bottom: none !important;
+  padding-top: 1rem !important;
+  text-align: left !important;
+}
+#order_review .shop_table tfoot .order-total td {
+  text-align: right !important;
+}
+#order_review .order-total .amount {
+  color: #d8ea9c !important;
+  font-family: var(--wp--preset--font-family--display) !important;
+  font-size: 1.755rem !important;
+  font-weight: 300 !important;
+}
+/* Hide the WooCommerce built-in shipping method row entirely — we use custom fee rows instead */
+#order_review .shop_table tfoot .shipping {
+  display: none !important;
+}
+/* ─── Payment section ───────────────────────────────────────────── */
+#payment {
+  background: transparent !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+  padding: 1.25rem 0 0 !important;
+  margin-top: 1.25rem !important;
+}
+#payment .payment_methods {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 0 .75rem !important;
+  border: none !important;
+}
+#payment .payment_methods li {
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 8px !important;
+  padding: .75rem 1rem !important;
+  margin-bottom: .45rem !important;
+  list-style: none !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: .5rem .6rem !important;
+}
+#payment .payment_methods li input[type="radio"] {
+  flex-shrink: 0 !important;
+}
+#payment .payment_methods li label {
+  flex: 1 !important;
+  color: #f0ede6 !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .82rem !important;
+  font-weight: 300 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: .6rem !important;
+  margin: 0 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+#payment .payment_methods li .payment_box {
+  flex-basis: 100% !important;
+  width: 100% !important;
+}
+#payment .payment_methods li label a {
+  color: rgba(240,237,230,.4) !important;
+  font-size: .75rem !important;
+  text-decoration: none !important;
+}
+#payment .payment_methods li label a:hover {
+  color: rgba(240,237,230,.7) !important;
+}
+#payment .payment_methods li label img {
+  max-height: 22px !important;
+  width: auto !important;
+  margin-left: auto !important;
+  vertical-align: middle !important;
+  border-radius: 3px !important;
+}
+#payment .payment_methods li input[type="radio"] {
+  accent-color: var(--wp--preset--color--lime) !important;
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+}
+#payment .payment_box {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  border-radius: 6px !important;
+  padding: .65rem 1rem !important;
+  margin-top: .35rem !important;
+  color: rgba(240,237,230,.55) !important;
+  font-size: .75rem !important;
+}
+#payment .payment_box p { margin: 0 !important; }
+
+/* ─── Place order button ────────────────────────────────────────── */
+#payment #place_order {
+  display: block !important;
+  width: 100% !important;
+  background: var(--wp--preset--color--lime) !important;
+  color: var(--wp--preset--color--ink) !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .72rem !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  font-weight: 400 !important;
+  padding: 1rem !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background .2s, transform .15s !important;
+  margin-top: .85rem !important;
+}
+#payment #place_order:hover {
+  background: #799721 !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Privacy policy / secure notice */
+.woocommerce-checkout #payment .woocommerce-privacy-policy-text,
+.woocommerce-checkout #payment .place-order small {
+  font-size: .65rem !important;
+  color: rgba(240,237,230,.35) !important;
+  text-align: center !important;
+  display: block !important;
+  margin-top: .65rem !important;
+}
+
+/* ─── Minimal checkout header ───────────────────────────────────── */
+.bf-header-minimal {
+  background: #1a1a1a;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 300;
+}
+
+/* ─── Secure Checkout Badge ─────────────────────────────────────── */
+.bf-secure-checkout-badge {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  text-align: left;
+}
+.bf-secure-checkout-badge h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: 0.85rem !important;
+  color: #f0ede6 !important;
+  margin: 0 0 0.4rem !important;
+  font-weight: 500 !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+.bf-secure-checkout-badge h4 svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--wp--preset--color--lime);
+}
+.bf-secure-checkout-badge p {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: 0.75rem !important;
+  color: rgba(240, 237, 230, 0.6) !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* ─── Product Image & Name in Sidebar ───────────────────────────── */
+.bf-checkout-item-name {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.bf-checkout-item-thumb {
+  position: relative;
+  width: 55px;
+  height: 55px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px;
+}
+.bf-checkout-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.bf-qty-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(120, 120, 120, 0.95);
+  color: #fff;
+  font-family: var(--wp--preset--font-family--ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  line-height: 1;
+}
+.bf-checkout-item-title {
+  font-family: var(--wp--preset--font-family--display);
+  font-size: 0.85rem;
+  color: #f0ede6;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* ─── Custom Coupon Wrapper in Sidebar ──────────────────────────── */
+.woocommerce-form-coupon-toggle,
+form.checkout_coupon {
+  display: none !important; /* Hide original */
+}
+.bf-custom-coupon-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+/* Higher specificity to override .woocommerce-checkout input[type="text"] */
+#order_review .bf-custom-coupon-wrapper input,
+.bf-custom-coupon-wrapper input.input-text {
+  flex-grow: 1 !important;
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: #f0ede6 !important;
+  padding: 0.6rem 0.9rem !important;
+  border-radius: 6px !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: 0.78rem !important;
+  height: 38px !important;
+  box-sizing: border-box !important;
+  transition: border-color .2s !important;
+}
+#order_review .bf-custom-coupon-wrapper input:focus,
+.bf-custom-coupon-wrapper input.input-text:focus {
+  border-color: rgba(255,255,255,.3) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.bf-custom-coupon-wrapper input::placeholder {
+  color: rgba(240,237,230,.3) !important;
+}
+.bf-custom-coupon-wrapper button {
+  background: var(--wp--preset--color--lime) !important;
+  color: var(--wp--preset--color--ink) !important;
+  border: none !important;
+  padding: 0 1rem !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-weight: 400 !important;
+  font-size: 0.65rem !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  height: 38px !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  transition: background .2s !important;
+  flex-shrink: 0 !important;
+}
+.bf-custom-coupon-wrapper button:hover {
+  background: #9fc42e !important;
+}
+
+/* ─── Hide white AJAX blockUI overlay inside dark sidebar ───────── */
+#order_review .blockOverlay,
+.woocommerce-checkout-review-order .blockOverlay {
+  background: rgba(36, 36, 36, 0.6) !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+}
+/* Also hide any stray hr / separators WooCommerce injects after AJAX */
+.woocommerce-checkout-review-order-table + hr,
+#order_review hr {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ORDER CONFIRMATION (Thank You page) — body.woocommerce-order-received
+═══════════════════════════════════════════════════════════════ */
+
+body.woocommerce-order-received {
+  background: #edece8 !important;
+}
+
+/* WC renders confirmation blocks as direct children of .wp-site-blocks
+   (the wp:group wrapper in order-confirmation.html is silently dropped).
+   Constrain every block individually to create a centered single column. */
+body.woocommerce-order-received .wc-block-store-notices,
+body.woocommerce-order-received .wc-block-order-confirmation-status,
+body.woocommerce-order-received .wc-block-order-confirmation-status-description,
+body.woocommerce-order-received .wc-block-order-confirmation-additional-information,
+body.woocommerce-order-received .wc-block-order-confirmation-summary,
+body.woocommerce-order-received .wc-block-order-confirmation-totals-wrapper,
+body.woocommerce-order-received .wc-block-order-confirmation-downloads-wrapper,
+body.woocommerce-order-received .wc-block-order-confirmation-billing-wrapper,
+body.woocommerce-order-received .wc-block-order-confirmation-delivery-wrapper,
+body.woocommerce-order-received .wc-block-order-confirmation-additional-fields-wrapper {
+  max-width: 680px !important;
+  width: calc(100% - 2.5rem) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box !important;
+}
+
+/* Top breathing room above the first block */
+body.woocommerce-order-received .wc-block-order-confirmation-status {
+  margin-top: 2.5rem !important;
+}
+
+/* Reset any WP block group / post-content internal padding */
+body.woocommerce-order-received .wp-block-group,
+body.woocommerce-order-received .wp-block-post-content {
+  padding: 0 !important;
+}
+
+/* ─── Status ("Gracias. Tu pedido ha sido recibido.") ────────── */
+.wc-block-order-confirmation-status {
+  text-align: center !important;
+  margin-bottom: 1.75rem !important;
+}
+.wc-block-order-confirmation-status p,
+.wc-block-order-confirmation-status h2 {
+  font-family: var(--wp--preset--font-family--display) !important;
+  font-size: clamp(2.36rem, 6.75vw, 3.51rem) !important;
+  font-weight: 300 !important;
+  color: var(--wp--preset--color--ink) !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+}
+.wc-block-order-confirmation-status-description {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .82rem !important;
+  color: rgba(20,20,18,.5) !important;
+  margin: .5rem 0 0 !important;
+}
+.wc-block-order-confirmation-status a.button,
+.woocommerce-order-received .return-to-shop a {
+  display: inline-block !important;
+  margin-top: 1.25rem !important;
+  background: var(--wp--preset--color--ink) !important;
+  color: #fff !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .72rem !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+  padding: .75rem 1.75rem !important;
+  border-radius: 8px !important;
+  text-decoration: none !important;
+  transition: background .2s !important;
+}
+.wc-block-order-confirmation-status a.button:hover,
+.woocommerce-order-received .return-to-shop a:hover {
+  background: #333 !important;
+}
+
+/* ─── Bank transfer banner ───────────────────────────────────── */
+.wc-block-order-confirmation-additional-information {
+  background: #fff !important;
+  border: 1.5px solid #abd037 !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  margin-bottom: 1rem !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+/* Green header strip */
+.wc-block-order-confirmation-additional-information::before {
+  content: '💳  Completa tu pago para confirmar tu pedido' !important;
+  display: block !important;
+  background: #abd037 !important;
+  color: #1a1a1a !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  padding: .65rem 1.25rem !important;
+}
+.wc-block-order-confirmation-additional-information > * {
+  padding: 0 1.25rem !important;
+  margin: 0 !important;
+}
+.wc-block-order-confirmation-additional-information > *:first-child {
+  padding-top: 1rem !important;
+}
+.wc-block-order-confirmation-additional-information > *:last-child {
+  padding-bottom: 1.25rem !important;
+}
+.wc-block-order-confirmation-additional-information p {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  line-height: 1.65 !important;
+  margin: 0 0 .6rem !important;
+}
+.wc-block-order-confirmation-additional-information p:last-child {
+  margin-bottom: 0 !important;
+}
+/* Highlight the account number line */
+.wc-block-order-confirmation-additional-information p strong,
+.wc-block-order-confirmation-additional-information p b {
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+}
+
+/* ─── Shared card style ──────────────────────────────────────── */
+.wc-block-order-confirmation-summary,
+.wc-block-order-confirmation-totals-wrapper,
+.wc-block-order-confirmation-downloads-wrapper,
+.wc-block-order-confirmation-billing-wrapper,
+.wc-block-order-confirmation-delivery-wrapper,
+.wc-block-order-confirmation-additional-fields-wrapper {
+  background: #fff !important;
+  border: 1px solid #dedad2 !important;
+  border-radius: 10px !important;
+  padding: 1.5rem 1.75rem !important;
+  margin-bottom: 1.2rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Card headings — override WC inline font-size:24px from patterns */
+.wc-block-order-confirmation-totals-wrapper .wp-block-heading,
+.wc-block-order-confirmation-downloads-wrapper .wp-block-heading,
+.wc-block-order-confirmation-billing-wrapper .wp-block-heading,
+.wc-block-order-confirmation-delivery-wrapper .wp-block-heading,
+.wc-block-order-confirmation-additional-fields-wrapper .wp-block-heading,
+.wc-block-order-confirmation-totals-wrapper h2,
+.wc-block-order-confirmation-totals-wrapper h3,
+.wc-block-order-confirmation-downloads-wrapper h2,
+.wc-block-order-confirmation-downloads-wrapper h3,
+.wc-block-order-confirmation-billing-wrapper h2,
+.wc-block-order-confirmation-billing-wrapper h3,
+.wc-block-order-confirmation-delivery-wrapper h2,
+.wc-block-order-confirmation-delivery-wrapper h3,
+.wc-block-order-confirmation-additional-fields-wrapper h2,
+.wc-block-order-confirmation-additional-fields-wrapper h3 {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .6rem !important;
+  font-weight: 400 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  color: rgba(20,20,18,.4) !important;
+  margin: 0 0 1rem !important;
+  padding-bottom: .65rem !important;
+  border-bottom: 1px solid rgba(20,20,18,.07) !important;
+}
+
+/* ─── Summary list (order #, date, total, payment) ───────────── */
+.wc-block-order-confirmation-summary-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: .9rem 1.2rem !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+@media (min-width: 540px) {
+  .wc-block-order-confirmation-summary-list {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+.wc-block-order-confirmation-summary-list-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: .15rem !important;
+}
+.wc-block-order-confirmation-summary-list-item__label {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .58rem !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  color: rgba(20,20,18,.4) !important;
+  font-weight: 300 !important;
+}
+.wc-block-order-confirmation-summary-list-item__value {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  font-weight: 400 !important;
+}
+
+/* ─── Totals table ───────────────────────────────────────────── */
+.wc-block-order-confirmation-totals table {
+  width: 100% !important;
+  border: none !important;        /* override WC block's outer table border */
+  border-collapse: collapse !important;
+  border-radius: 0 !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+}
+
+/* Single divider per row — no cell borders at all */
+.wc-block-order-confirmation-totals table td,
+.wc-block-order-confirmation-totals table th {
+  padding: 1.2rem 0 !important;
+  border: none !important;
+  color: var(--wp--preset--color--ink) !important;
+  vertical-align: middle !important;
+}
+
+/* One separator per row */
+.wc-block-order-confirmation-totals table tr {
+  border-bottom: 1px solid rgba(20,20,18,.07) !important;
+}
+.wc-block-order-confirmation-totals table thead tr {
+  border-bottom: 1px solid rgba(20,20,18,.1) !important;
+}
+/* No bottom border on last visible row */
+.wc-block-order-confirmation-totals table tfoot tr.order-total,
+.wc-block-order-confirmation-totals .shop_table tbody tr:last-child {
+  border-bottom: none !important;
+}
+
+/* Column alignment — left label, right value */
+.wc-block-order-confirmation-totals table th:first-child,
+.wc-block-order-confirmation-totals table td:first-child {
+  text-align: left !important;
+  font-weight: 300 !important;
+  color: rgba(20,20,18,.55) !important;
+}
+.wc-block-order-confirmation-totals table th:last-child,
+.wc-block-order-confirmation-totals table td:last-child {
+  text-align: right !important;
+  font-size: 1.09rem !important;
+}
+
+/* thead labels — hidden, redundant in card layout */
+.wc-block-order-confirmation-totals table thead {
+  display: none !important;
+}
+
+/* Total row */
+.wc-block-order-confirmation-totals table tfoot .order-total th,
+.wc-block-order-confirmation-totals table tfoot .order-total td {
+  font-size: 1.14rem !important;
+  font-weight: 500 !important;
+  color: var(--wp--preset--color--ink) !important;
+  padding-top: 1.1rem !important;
+}
+
+/* ─── "Datos de Entrega" card table — mirrors Detalles del Pedido ─ */
+.wc-block-order-confirmation-delivery-wrapper .shop_table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+}
+.wc-block-order-confirmation-delivery-wrapper .shop_table tbody tr {
+  border-bottom: 1px solid rgba(20,20,18,.07) !important;
+}
+.wc-block-order-confirmation-delivery-wrapper .shop_table tbody tr:last-child {
+  border-bottom: none !important;
+}
+.wc-block-order-confirmation-delivery-wrapper .shop_table th,
+.wc-block-order-confirmation-delivery-wrapper .shop_table td {
+  padding: 1.2rem 0 !important;
+  border: none !important;
+  color: var(--wp--preset--color--ink) !important;
+  vertical-align: middle !important;
+}
+.wc-block-order-confirmation-delivery-wrapper .shop_table th {
+  text-align: left !important;
+  font-size: .84rem !important;
+  font-weight: 300 !important;
+  color: rgba(20,20,18,.55) !important;
+  width: 50% !important;
+  padding-right: 1rem !important;
+}
+.wc-block-order-confirmation-delivery-wrapper .shop_table td {
+  text-align: right !important;
+  font-weight: 400 !important;
+}
+
+/* ─── Delivery / billing address fields (dl lists) ───────────── */
+.wc-block-order-confirmation-additional-fields-wrapper dl,
+.wc-block-order-confirmation-billing-address address,
+.wc-block-order-confirmation-shipping-address address {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  font-size: .84rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  line-height: 1.65 !important;
+  font-style: normal !important;
+  margin: 0 !important;
+}
+.wc-block-components-additional-fields-list {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: .5rem 1rem !important;
+  margin: 0 !important;
+}
+.wc-block-components-additional-fields-list dt {
+  font-size: .6rem !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  color: rgba(20,20,18,.4) !important;
+  font-weight: 300 !important;
+  align-self: end !important;
+}
+.wc-block-components-additional-fields-list dd {
+  font-size: .84rem !important;
+  color: var(--wp--preset--color--ink) !important;
+  margin: 0 !important;
+  align-self: start !important;
+}
+
+/* ─── Price amount spans — override WooCommerce base color in sidebar ─ */
+/* Product row price */
+#order_review .shop_table .product-total .woocommerce-Price-amount,
+#order_review .shop_table .product-total .woocommerce-Price-amount bdi {
+  color: #f0ede6 !important;
+}
+/* Subtotal / fee rows */
+#order_review .shop_table tfoot tr td .woocommerce-Price-amount,
+#order_review .shop_table tfoot tr td .woocommerce-Price-amount bdi {
+  color: #f0ede6 !important;
+}
+/* Total row */
+#order_review .shop_table tfoot tr.order-total td .woocommerce-Price-amount,
+#order_review .shop_table tfoot tr.order-total td .woocommerce-Price-amount bdi {
+  color: #f0f7d5 !important;
+}

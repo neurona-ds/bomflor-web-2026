@@ -1,0 +1,23 @@
+# Ignore everything by default
+/*
+
+# Don't ignore .gitignore itself
+!.gitignore
+
+# Allow themes folder, but ignore everything in it...
+!themes/
+themes/*
+# ...except our theme
+!themes/bomflor/
+
+# Allow plugins folder, but ignore everything in it...
+!plugins/
+plugins/*
+# ...except our plugin
+!plugins/bomflor-seo/
+
+# Always ignore these even inside tracked folders
+**/node_modules/
+**/.DS_Store
+**/debug.log
+**/cache/
