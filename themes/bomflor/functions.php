@@ -1,8 +1,63 @@
 <?php
 declare(strict_types=1);
 
-// Logo admin page under Appearance
+// Logo + Favicon admin pages under Appearance
 add_action('admin_menu', function (): void {
+    add_theme_page('Favicon', 'Favicon', 'manage_options', 'bomflor-favicon', function (): void {
+        if (isset($_POST['bomflor_favicon_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bomflor_favicon_nonce'])), 'bomflor_save_favicon')) {
+            $attachment_id = isset($_POST['site_icon']) ? absint($_POST['site_icon']) : 0;
+            if ($attachment_id) {
+                update_option('site_icon', $attachment_id);
+            } else {
+                delete_option('site_icon');
+            }
+            echo '<div class="notice notice-success"><p>Favicon actualizado.</p></div>';
+        }
+        $current_id  = (int) get_option('site_icon', 0);
+        $current_url = $current_id ? wp_get_attachment_image_url($current_id, 'full') : '';
+        ?>
+        <div class="wrap">
+            <h1>Favicon del sitio</h1>
+            <p style="color:#666">Recomendado: imagen cuadrada PNG/SVG de al menos 512×512 px.</p>
+            <form method="post">
+                <?php wp_nonce_field('bomflor_save_favicon', 'bomflor_favicon_nonce'); ?>
+                <input type="hidden" name="site_icon" id="site_icon" value="<?php echo esc_attr($current_id); ?>">
+                <div style="margin:20px 0">
+                    <div id="favicon-preview" style="margin-bottom:12px">
+                        <?php if ($current_url): ?>
+                            <img src="<?php echo esc_url($current_url); ?>" style="max-height:64px;display:block">
+                        <?php endif; ?>
+                    </div>
+                    <button type="button" class="button" id="upload-favicon-btn">Seleccionar imagen</button>
+                    <?php if ($current_id): ?>
+                        <button type="button" class="button" id="remove-favicon-btn" style="margin-left:8px">Eliminar favicon</button>
+                    <?php endif; ?>
+                </div>
+                <?php submit_button('Guardar favicon'); ?>
+            </form>
+        </div>
+        <script>
+        jQuery(function($) {
+            var frame;
+            $('#upload-favicon-btn').on('click', function() {
+                if (frame) { frame.open(); return; }
+                frame = wp.media({ title: 'Seleccionar favicon', button: { text: 'Usar esta imagen' }, multiple: false });
+                frame.on('select', function() {
+                    var att = frame.state().get('selection').first().toJSON();
+                    $('#site_icon').val(att.id);
+                    $('#favicon-preview').html('<img src="' + att.url + '" style="max-height:64px;display:block">');
+                });
+                frame.open();
+            });
+            $('#remove-favicon-btn').on('click', function() {
+                $('#site_icon').val('');
+                $('#favicon-preview').html('');
+            });
+        });
+        </script>
+        <?php
+        wp_enqueue_media();
+    });
     add_theme_page('Logo del sitio', 'Logo', 'manage_options', 'bomflor-logo', function (): void {
         if (isset($_POST['bomflor_logo_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bomflor_logo_nonce'])), 'bomflor_save_logo')) {
             $attachment_id = isset($_POST['custom_logo']) ? absint($_POST['custom_logo']) : 0;
