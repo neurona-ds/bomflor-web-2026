@@ -73,6 +73,55 @@ add_action('wp_enqueue_scripts', function (): void {
     ]);
 });
 
+// Organization JSON-LD structured data
+add_action('wp_head', function (): void {
+    echo '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Florist",
+  "name": "Bomflor",
+  "image": "https://www.bomflor.com/wp-content/uploads/2026/04/bomflor-logo2.svg",
+  "url": "https://www.bomflor.com",
+  "telephone": "+593987532264",
+  "priceRange": "$",
+  "description": "Florister\u00eda en Quito especializada en arreglos florales para cumplea\u00f1os, aniversarios, condolencias y eventos corporativos. Entrega a domicilio el mismo d\u00eda.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Villalengua Oe3-63 y Av. Am\u00e9rica",
+    "addressLocality": "Quito",
+    "addressRegion": "Pichincha",
+    "addressCountry": "EC"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": -0.1807,
+    "longitude": -78.4858
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "08:00",
+      "closes": "15:30"
+    }
+  ],
+  "areaServed": {
+    "@type": "City",
+    "name": "Quito"
+  },
+  "sameAs": [
+    "https://www.facebook.com/bomflor/",
+    "https://www.instagram.com/bomflor/"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "500"
+  }
+}
+</script>' . "\n";
+}, 1);
+
 // Preconnect to Google Fonts + unpkg for faster external resource resolution
 add_action('wp_head', function (): void {
     echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
