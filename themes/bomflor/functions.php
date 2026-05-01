@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+// Re-add Customize link hidden by block theme
+add_action('admin_menu', function (): void {
+    add_theme_page('Personalizar', 'Personalizar', 'customize', 'customize.php');
+});
+
 // Theme setup
 add_action('after_setup_theme', function (): void {
     add_theme_support('wp-block-styles');
