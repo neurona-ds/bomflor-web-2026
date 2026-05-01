@@ -294,6 +294,9 @@ form.woocommerce-checkout {
   margin-bottom: .35rem !important;
   display: block !important;
 }
+.woocommerce-checkout .form-row > label .optional {
+  display: none !important;
+}
 
 /* ─── Inputs ────────────────────────────────────────────────────── */
 .woocommerce-checkout input[type="text"],
