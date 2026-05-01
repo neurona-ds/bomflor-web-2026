@@ -320,6 +320,10 @@ form.woocommerce-checkout {
   -webkit-appearance: none !important;
   appearance: none !important;
 }
+.woocommerce-checkout input:not([type="radio"]):not([type="checkbox"]),
+.woocommerce-checkout select {
+  min-height: 46px !important;
+}
 .woocommerce-checkout input:focus,
 .woocommerce-checkout select:focus,
 .woocommerce-checkout textarea:focus {
