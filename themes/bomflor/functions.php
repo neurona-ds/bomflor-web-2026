@@ -1,9 +1,12 @@
 <?php
 declare(strict_types=1);
 
-// Re-add Customize link hidden by block theme
+// Re-add Customize link hidden by block theme + re-enable Publish button
 add_action('admin_menu', function (): void {
     add_theme_page('Personalizar', 'Personalizar', 'customize', 'customize.php');
+});
+add_action('customize_controls_enqueue_scripts', function (): void {
+    wp_add_inline_script('customize-controls', '_wpCustomizeSettings.theme.block_theme = false;', 'after');
 });
 
 // Theme setup
