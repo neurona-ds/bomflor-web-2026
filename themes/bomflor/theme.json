@@ -13,7 +13,7 @@
         { "slug": "ink-soft",   "color": "#3C3C38",             "name": "Ink Soft" },
         { "slug": "ink-muted",  "color": "rgba(20,20,18,0.4)",  "name": "Ink Muted" },
         { "slug": "paper",      "color": "#F8F6F1",             "name": "Paper" },
-        { "slug": "paper-warm", "color": "#F0EDE6",             "name": "Paper Warm" },
+        { "slug": "paper-warm", "color": "#E4E0D6",             "name": "Paper Warm" },
         { "slug": "white",      "color": "#FFFFFF",             "name": "White" },
         { "slug": "lime",       "color": "#ABD037",             "name": "Lime" },
         { "slug": "lime-deep",  "color": "#799721",             "name": "Lime Deep" },
