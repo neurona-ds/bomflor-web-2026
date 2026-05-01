@@ -1,12 +1,62 @@
 <?php
 declare(strict_types=1);
 
-// Re-add Customize link hidden by block theme + re-enable Publish button
+// Logo admin page under Appearance
 add_action('admin_menu', function (): void {
-    add_theme_page('Personalizar', 'Personalizar', 'customize', 'customize.php');
-});
-add_action('customize_controls_enqueue_scripts', function (): void {
-    wp_add_inline_script('customize-controls', '_wpCustomizeSettings.theme.block_theme = false;', 'after');
+    add_theme_page('Logo del sitio', 'Logo', 'manage_options', 'bomflor-logo', function (): void {
+        if (isset($_POST['bomflor_logo_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bomflor_logo_nonce'])), 'bomflor_save_logo')) {
+            $attachment_id = isset($_POST['custom_logo']) ? absint($_POST['custom_logo']) : 0;
+            if ($attachment_id) {
+                set_theme_mod('custom_logo', $attachment_id);
+            } else {
+                remove_theme_mod('custom_logo');
+            }
+            echo '<div class="notice notice-success"><p>Logo actualizado.</p></div>';
+        }
+        $current_logo_id = get_theme_mod('custom_logo', 0);
+        $current_logo_url = $current_logo_id ? wp_get_attachment_image_url($current_logo_id, 'full') : '';
+        ?>
+        <div class="wrap">
+            <h1>Logo del sitio</h1>
+            <form method="post">
+                <?php wp_nonce_field('bomflor_save_logo', 'bomflor_logo_nonce'); ?>
+                <input type="hidden" name="custom_logo" id="custom_logo" value="<?php echo esc_attr($current_logo_id); ?>">
+                <div style="margin:20px 0">
+                    <div id="logo-preview" style="margin-bottom:12px">
+                        <?php if ($current_logo_url): ?>
+                            <img src="<?php echo esc_url($current_logo_url); ?>" style="max-height:80px;display:block">
+                        <?php endif; ?>
+                    </div>
+                    <button type="button" class="button" id="upload-logo-btn">Seleccionar imagen</button>
+                    <?php if ($current_logo_id): ?>
+                        <button type="button" class="button" id="remove-logo-btn" style="margin-left:8px">Eliminar logo</button>
+                    <?php endif; ?>
+                </div>
+                <?php submit_button('Guardar logo'); ?>
+            </form>
+        </div>
+        <script>
+        jQuery(function($) {
+            var frame;
+            $('#upload-logo-btn').on('click', function() {
+                if (frame) { frame.open(); return; }
+                frame = wp.media({ title: 'Seleccionar logo', button: { text: 'Usar este logo' }, multiple: false });
+                frame.on('select', function() {
+                    var att = frame.state().get('selection').first().toJSON();
+                    $('#custom_logo').val(att.id);
+                    $('#logo-preview').html('<img src="' + att.url + '" style="max-height:80px;display:block">');
+                });
+                frame.open();
+            });
+            $('#remove-logo-btn').on('click', function() {
+                $('#custom_logo').val('');
+                $('#logo-preview').html('');
+            });
+        });
+        </script>
+        <?php
+        wp_enqueue_media();
+    });
 });
 
 // Theme setup
