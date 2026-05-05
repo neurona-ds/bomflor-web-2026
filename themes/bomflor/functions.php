@@ -619,9 +619,8 @@ add_action('woocommerce_checkout_after_customer_details', function (): void {
         'required' => true,
         'options' => [
             '' => __('Seleccione horario', 'bomflor'),
-            '08:00-12:00' => '08:00 – 12:00',
-            '12:00-16:00' => '12:00 – 16:00',
-            '16:00-20:00' => '16:00 – 20:00',
+            '08:00-13:00' => '08:00 AM – 01:00 PM',
+            '13:00-17:00' => '01:00 PM – 05:00 PM',
         ],
     ], $checkout->get_value('bomflor_delivery_time'));
 
