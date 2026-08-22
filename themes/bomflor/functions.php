@@ -605,16 +605,17 @@ add_action('woocommerce_checkout_after_customer_details', function (): void {
         'required' => true,
     ], $checkout->get_value('bomflor_recipient_phone'));
 
-    woocommerce_form_field('bomflor_delivery_date', [
-        'type' => 'date',
-        'class' => ['form-row-first'],
-        'label' => __('Fecha de Entrega', 'bomflor'),
-        'required' => true,
-    ], $checkout->get_value('bomflor_delivery_date'));
+    // Fecha de entrega: la aporta el plugin woo-delivery, así respeta los días
+    // marcados en su pantalla de ajustes (Delivery Days / Off Days). El plugin la
+    // imprime en woocommerce_after_checkout_billing_form; la capturamos allí y la
+    // re-emitimos aquí — ver "Reubicar el bloque de woo-delivery" al final del archivo.
+    if (!empty($GLOBALS['bf_woo_delivery_html'])) {
+        echo $GLOBALS['bf_woo_delivery_html'];
+    }
 
     woocommerce_form_field('bomflor_delivery_time', [
         'type' => 'select',
-        'class' => ['form-row-last'],
+        'class' => ['form-row-wide'],
         'label' => __('Horario de Entrega', 'bomflor'),
         'required' => true,
         'options' => [
@@ -756,9 +757,8 @@ add_action('woocommerce_checkout_process', function (): void {
     if (empty($_POST['bomflor_recipient_phone'])) {
         wc_add_notice(__('Ingresa el celular de quien recibe.', 'bomflor'), 'error');
     }
-    if (empty($_POST['bomflor_delivery_date'])) {
-        wc_add_notice(__('Selecciona la fecha de entrega.', 'bomflor'), 'error');
-    }
+    // La fecha de entrega la valida el propio plugin woo-delivery
+    // (ajuste "Make Delivery Date Field Mandatory"), no la duplicamos aquí.
     if (empty($_POST['bomflor_delivery_time'])) {
         wc_add_notice(__('Selecciona el horario de entrega.', 'bomflor'), 'error');
     }
@@ -1421,3 +1421,38 @@ add_action('woocommerce_after_shop_loop_item_title', function () {
     $term = reset($terms);
     echo '<span class="bf-loop-product-cat">' . esc_html($term->name) . '</span>';
 }, 8);
+
+// ─── Reubicar el bloque de woo-delivery dentro del card "Datos de Entrega" ────
+// El ajuste "Field Position" del plugin sólo ofrece posiciones fijas de WooCommerce,
+// y la más cercana ("After Billing Address") lo deja dentro del card de facturación.
+// Lo capturamos ahí con un buffer y lo re-emitimos dentro de .bomflor-delivery-fields.
+//
+// Orden garantizado: woocommerce_after_checkout_billing_form corre dentro de
+// woocommerce_checkout_billing, que en form-checkout.php va antes de
+// woocommerce_checkout_after_customer_details (donde se dibuja el card).
+// Prioridades 9 y 11: encierran exactamente la prioridad 10 de woo-delivery, así no
+// arrastramos lo que otros plugins (p. ej. flexible-checkout-fields) impriman aquí.
+add_action('woocommerce_after_checkout_billing_form', function (): void {
+    ob_start();
+}, 9);
+
+add_action('woocommerce_after_checkout_billing_form', function (): void {
+    $GLOBALS['bf_woo_delivery_html'] = ob_get_clean();
+}, 11);
+
+// ─── Puente de meta: 'delivery_date' (plugin) → 'bomflor_delivery_date' (tema) ──
+// El plugin guarda la fecha en su propia meta. Copiarla evita tocar la página de
+// gracias, los emails y el admin, que siguen leyendo la clave del tema.
+// Prioridad 99: corre después del guardado del plugin (prioridad 10) en el mismo hook.
+add_action('woocommerce_checkout_update_order_meta', function (int $order_id): void {
+    $order = wc_get_order($order_id);
+    if (!$order) {
+        return;
+    }
+    // get_meta() sirve tanto para HPOS como para el almacenamiento clásico.
+    $delivery_date = $order->get_meta('delivery_date');
+    if ($delivery_date) {
+        $order->update_meta_data('bomflor_delivery_date', $delivery_date);
+        $order->save();
+    }
+}, 99);
