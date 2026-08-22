@@ -282,6 +282,24 @@ form.woocommerce-checkout {
   clear: both;
 }
 
+/* ─── Bloque de woo-delivery reubicado dentro del card ───────────── */
+/* El plugin envuelve su campo en dos divs propios. Son bloques normales, así que
+   no limpian el float de la pareja "Para quién / Celular" que va encima y el
+   campo se les monta. Los forzamos a fila completa que limpia ambos lados. */
+.bomflor-delivery-fields #coderockz_woo_delivery_setting_wrapper,
+.bomflor-delivery-fields #coderockz_woo_delivery_delivery_date_section,
+.bomflor-delivery-fields .coderockz_woo_delivery_date_field {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  width: 100% !important;
+  margin-inline: 0 !important;
+}
+/* El wrapper exterior no es .form-row, así que no hereda la separación. */
+.bomflor-delivery-fields #coderockz_woo_delivery_setting_wrapper {
+  margin-bottom: .9rem !important;
+}
+
 /* ─── Labels ────────────────────────────────────────────────────── */
 .woocommerce-checkout .form-row > label,
 .woocommerce-checkout .woocommerce-form__label {
