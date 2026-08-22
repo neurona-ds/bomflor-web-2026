@@ -370,6 +370,43 @@ form.woocommerce-checkout {
   color: #c55;
 }
 
+/* ─── Delivery date picker ──────────────────────────────────────── */
+/* Inline notice shown when a closed day is picked (native-input fallback only —
+   flatpickr makes those days unclickable instead). */
+.woocommerce-checkout .bf-date-error {
+  display: block;
+  margin-top: .35rem;
+  font-family: var(--wp--preset--font-family--ui);
+  font-size: .7rem;
+  line-height: 1.4;
+  color: #c55;
+}
+
+/* flatpickr ships with the woo-delivery plugin; retint it to the checkout palette. */
+.flatpickr-calendar {
+  font-family: var(--wp--preset--font-family--ui) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12) !important;
+}
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--wp--preset--color--lime) !important;
+  border-color: var(--wp--preset--color--lime) !important;
+  color: var(--wp--preset--color--ink) !important;
+}
+.flatpickr-day:hover:not(.flatpickr-disabled) {
+  background: rgba(171,208,55,.18) !important;
+  border-color: transparent !important;
+}
+/* Closed days: readable, but clearly not on offer. */
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.flatpickr-disabled:hover {
+  color: #c9c5bd !important;
+  background: transparent !important;
+  text-decoration: line-through !important;
+  cursor: not-allowed !important;
+}
+
 /* ─── Sidebar: order review heading ────────────────────────────── */
 h3#order_review_heading {
   font-family: var(--wp--preset--font-family--ui) !important;

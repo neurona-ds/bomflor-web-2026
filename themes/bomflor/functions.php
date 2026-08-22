@@ -162,6 +162,18 @@ add_action('wp_enqueue_scripts', function (): void {
     }
     if (is_checkout()) {
         wp_enqueue_style('bomflor-checkout', "$dir/assets/css/checkout.css", ['bomflor-woocommerce'], $v);
+
+        // flatpickr is registered on checkout by the woo-delivery plugin (priority 0, so it is
+        // already there). Depend on it only when present — the script degrades to the native
+        // date input otherwise.
+        $flatpickr_deps = wp_script_is('flatpickr_js', 'registered') ? ['flatpickr_js'] : [];
+        wp_enqueue_script(
+            'bomflor-checkout-delivery-date',
+            "$dir/assets/js/checkout-delivery-date.js",
+            $flatpickr_deps,
+            $v,
+            true
+        );
     }
 
     wp_enqueue_script('bomflor-navigation', "$dir/assets/js/navigation.js", [], $v, ['strategy' => 'defer', 'in_footer' => true]);
@@ -466,6 +478,106 @@ add_action('woocommerce_cart_totals_before_order_total', function (): void {
     <?php
 });
 
+// ─── Delivery-date rules, sourced from the woo-delivery plugin settings ──────────
+/**
+ * Normalise `coderockz_woo_delivery_date_settings` into the rules the theme's own
+ * `bomflor_delivery_date` field enforces.
+ *
+ * The plugin's own date field never renders on this checkout: every one of its
+ * field-position hooks lives behind `woocommerce_checkout_shipping`, which the theme's
+ * `woocommerce/checkout/form-checkout.php` override does not fire. Reading its options
+ * here keeps its admin screen (Delivery Date → días de entrega / off days) as the single
+ * source of truth for when Bomflor delivers.
+ *
+ * Weekday numbers follow the plugin's convention: 0 = domingo … 6 = sábado.
+ *
+ * @return array{allowed_weekdays:int[],disabled_weekdays:int[],off_dates:string[],min_date:string,max_date:string,week_starts_from:int,alt_format:string}
+ */
+function bomflor_get_delivery_date_rules(): array
+{
+    $settings = get_option('coderockz_woo_delivery_date_settings');
+    if (!is_array($settings)) {
+        $settings = [];
+    }
+
+    $delivery_days = (isset($settings['delivery_days']) && $settings['delivery_days'] !== '')
+        ? (string) $settings['delivery_days']
+        : '6,0,1,2,3,4,5';
+
+    $allowed = array_unique(array_filter(
+        array_map('intval', explode(',', $delivery_days)),
+        static fn(int $day): bool => $day >= 0 && $day <= 6
+    ));
+
+    // An all-days-unchecked config would lock the checkout outright — fall back to open.
+    if (!$allowed) {
+        $allowed = [0, 1, 2, 3, 4, 5, 6];
+    }
+    sort($allowed);
+
+    // `off_days` is stored as year => month name => "3,17,28".
+    $off_dates = [];
+    if (!empty($settings['off_days']) && is_array($settings['off_days'])) {
+        foreach ($settings['off_days'] as $year => $months) {
+            if (!is_array($months)) {
+                continue;
+            }
+            foreach ($months as $month => $days) {
+                $month_num = (int) (date_parse((string) $month)['month'] ?? 0);
+                if (!$month_num) {
+                    continue;
+                }
+                foreach (explode(',', (string) $days) as $day) {
+                    $day = trim($day);
+                    if ($day !== '') {
+                        $off_dates[] = sprintf('%04d-%02d-%02d', (int) $year, $month_num, (int) $day);
+                    }
+                }
+            }
+        }
+    }
+
+    $selectable = (isset($settings['selectable_date']) && $settings['selectable_date'] !== '')
+        ? max(1, (int) $settings['selectable_date'])
+        : 365;
+
+    $now = current_time('timestamp', 1);
+
+    return [
+        'allowed_weekdays'  => array_values($allowed),
+        'disabled_weekdays' => array_values(array_diff([0, 1, 2, 3, 4, 5, 6], $allowed)),
+        'off_dates'         => array_values(array_unique($off_dates)),
+        'min_date'          => wp_date('Y-m-d', $now),
+        'max_date'          => wp_date('Y-m-d', strtotime("+{$selectable} days", $now)),
+        'week_starts_from'  => isset($settings['week_starts_from']) ? (int) $settings['week_starts_from'] : 1,
+        'alt_format'        => (isset($settings['date_format']) && $settings['date_format'] !== '')
+            ? (string) $settings['date_format']
+            : 'F j, Y',
+    ];
+}
+
+/**
+ * Server-side counterpart to the datepicker constraints. The client rules only grey days
+ * out; this is what actually refuses the order.
+ */
+function bomflor_is_deliverable_date(string $date): bool
+{
+    $rules  = bomflor_get_delivery_date_rules();
+    $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date, wp_timezone());
+
+    if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+        return false;
+    }
+    if ($date < $rules['min_date'] || $date > $rules['max_date']) {
+        return false;
+    }
+    if (in_array((int) $parsed->format('w'), $rules['disabled_weekdays'], true)) {
+        return false;
+    }
+
+    return !in_array($date, $rules['off_dates'], true);
+}
+
 // ─── Delivery fields card (rendered after billing card) ──────────
 add_action('woocommerce_checkout_after_customer_details', function (): void {
     $checkout = WC()->checkout();
@@ -605,11 +717,22 @@ add_action('woocommerce_checkout_after_customer_details', function (): void {
         'required' => true,
     ], $checkout->get_value('bomflor_recipient_phone'));
 
+    // Constraints come from the woo-delivery plugin's settings — see bomflor_get_delivery_date_rules().
+    $date_rules = bomflor_get_delivery_date_rules();
+
     woocommerce_form_field('bomflor_delivery_date', [
         'type' => 'date',
         'class' => ['form-row-first'],
         'label' => __('Fecha de Entrega', 'bomflor'),
         'required' => true,
+        'custom_attributes' => [
+            'min' => $date_rules['min_date'],
+            'max' => $date_rules['max_date'],
+            'data-disabled-weekdays' => wp_json_encode($date_rules['disabled_weekdays']),
+            'data-off-dates' => wp_json_encode($date_rules['off_dates']),
+            'data-week-start' => (string) $date_rules['week_starts_from'],
+            'data-alt-format' => $date_rules['alt_format'],
+        ],
     ], $checkout->get_value('bomflor_delivery_date'));
 
     woocommerce_form_field('bomflor_delivery_time', [
@@ -756,8 +879,13 @@ add_action('woocommerce_checkout_process', function (): void {
     if (empty($_POST['bomflor_recipient_phone'])) {
         wc_add_notice(__('Ingresa el celular de quien recibe.', 'bomflor'), 'error');
     }
-    if (empty($_POST['bomflor_delivery_date'])) {
+    $delivery_date = isset($_POST['bomflor_delivery_date'])
+        ? sanitize_text_field(wp_unslash($_POST['bomflor_delivery_date']))
+        : '';
+    if ($delivery_date === '') {
         wc_add_notice(__('Selecciona la fecha de entrega.', 'bomflor'), 'error');
+    } elseif (!bomflor_is_deliverable_date($delivery_date)) {
+        wc_add_notice(__('No realizamos entregas en la fecha elegida. Por favor selecciona otra.', 'bomflor'), 'error');
     }
     if (empty($_POST['bomflor_delivery_time'])) {
         wc_add_notice(__('Selecciona el horario de entrega.', 'bomflor'), 'error');
